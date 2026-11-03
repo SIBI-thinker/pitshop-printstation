@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>%SHOP_NAME%</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    .welcome { max-width: 480px; margin: 0 auto; padding: 20px 16px 40px; }
+    .welcome .card { text-align: center; padding: 26px 20px; }
+    .welcome h1 { font-size: 26px; letter-spacing: -.02em; margin: 14px 0 8px; }
+    .badge { width: 64px; height: 64px; border-radius: 50%; margin: 0 auto; display: grid; place-items: center; font-size: 30px; background: var(--accent-soft); color: var(--accent); }
+    .badge.ok { background: var(--ok-soft); color: var(--ok); }
+    .address { display: flex; align-items: center; gap: 8px; margin: 18px 0 6px; padding: 8px 8px 8px 14px; border-radius: 14px; background: var(--surface-2); border: 1.5px dashed var(--line); }
+    .address code { flex: 1; font: 700 20px var(--mono); text-align: left; word-break: break-all; user-select: all; -webkit-user-select: all; }
+    .how { text-align: left; margin: 16px 0 0; padding-left: 22px; color: var(--muted); }
+    .how li { margin: 6px 0; }
+    .how b { color: var(--text); }
+  </style>
+</head>
+<body>
+  <main class="welcome">
+    <header class="topbar">
+      <div class="brand"><span class="mark"><i></i><i></i><i></i></span><span>%SHOP_NAME%</span></div>
+    </header>
+
+    <section id="step1" class="card">
+      <div class="badge">⎙</div>
+      <h1>Welcome</h1>
+      <p class="muted">You're on the print station Wi-Fi. Tap continue to start printing from your phone.</p>
+      <button id="continue" class="btn block" style="margin-top: 22px">Continue</button>
+    </section>
+
+    <section id="step2" class="card" hidden>
+      <div class="badge ok">✓</div>
+      <h1>You're connected</h1>
+      <p id="lead" class="muted">Uploading works best in your phone's browser.</p>
+      <a id="openBrowser" class="btn block" style="margin-top: 20px" hidden>Open in browser</a>
+      <div class="address">
+        <code id="address">%SITE_URL%</code>
+        <button id="copy" class="btn small ghost" type="button">Copy</button>
+      </div>
+      <ol id="how" class="how"></ol>
+    </section>
+  </main>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script>
+    (() => {
+      const $ = (id) => document.getElementById(id);
+      const ua = navigator.userAgent;
+      const android = /Android/i.test(ua);
+      const ios = /iPhone|iPad|iPod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      // The "Sign in to network" window is a stripped-down browser: Android marks it "; wv)", and iOS leaves out "Safari/".
+      const signInWindow = (android && /; wv\)/.test(ua)) || (ios && !/Safari\/|CriOS|FxiOS|EdgiOS/.test(ua));
+      const site = `${location.protocol}//${location.host}/`;
+      const intent = `intent://${location.host}/#Intent;scheme=http;action=android.intent.action.VIEW;S.browser_fallback_url=${encodeURIComponent(site)};end`;
+
+      function toast(message) {
+        const node = $('toast');
+        node.textContent = message;
+        node.classList.add('show');
+        setTimeout(() => node.classList.remove('show'), 2500);
+      }
+      function steps(lines) {
+        $('how').replaceChildren(...lines.map((html) => {
+          const li = document.createElement('li');
+          li.innerHTML = html;
+          return li;
+        }));
+      }
+
+      $('address').textContent = site;
+
+      $('continue').onclick = async () => {
+        $('continue').disabled = true;
+        $('continue').textContent = 'Connecting…';
+        try { await fetch('/api/connect', { method: 'POST' }); } catch (_) {}
+        // Already in a normal browser: go straight to the print page.
+        if (!signInWindow) return location.replace('/');
+        $('step1').hidden = true;
+        $('step2').hidden = false;
+        if (android) {
+          $('openBrowser').href = intent;
+          $('openBrowser').hidden = false;
+          $('lead').textContent = 'Opening your browser… If nothing happens, tap the button below.';
+          steps(['Or open <b>Chrome</b> and type the address above.']);
+          // Give the phone a moment to notice the Wi-Fi is online, so the browser uses it.
+          setTimeout(() => { location.href = intent; }, 2500);
+        } else if (ios) {
+          $('lead').textContent = 'Uploading works in Safari. Two quick steps:';
+          steps(['Tap <b>Done</b> at the top of this window.', 'Open <b>Safari</b> and go to the address above.']);
+        } else {
+          steps(['Open your browser and go to the address above.']);
+        }
+      };
+
+      $('copy').onclick = async () => {
+        try {
+          await navigator.clipboard.writeText(site);
+        } catch (_) {
+          const range = document.createRange();
+          range.selectNodeContents($('address'));
+          const selection = getSelection();
+          selection.removeAllRanges();
+          selection.addRange(range);
+          try { document.execCommand('copy'); } catch (__) {}
+        }
+        toast('Address copied');
+      };
+    })();
+  </script>
+</body>
+</html>

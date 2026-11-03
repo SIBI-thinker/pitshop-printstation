@@ -1,0 +1,20 @@
+{
+  "name": "scan-to-print-workstation",
+  "version": "1.0.0",
+  "description": "Offline Windows print counter: phones upload over the laptop hotspot, staff print with a 4-digit PIN",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "build": "node scripts/check.js",
+    "test": "npm run build"
+  },
+  "dependencies": {
+    "dotenv": "^18.0.9",
+    "express": "^5.3.0",
+    "multer": "^2.5.0",
+    "pdf-lib": "1.17.1",
+    "pdfjs-dist": "4.10.38",
+    "qrcode": "^1.5.4"
+  }
+}

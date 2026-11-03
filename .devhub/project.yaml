@@ -1,0 +1,23 @@
+# DevHub project file — what this project is and how to run it.
+# Read by DevHub (How to run card, Run/Stop buttons), by AI agents through the DevHub MCP server,
+# and by people. Edit freely; DevHub never overwrites it. Fields:
+#   run   long-running commands (dev servers, agents)   setup / build / test   one-shot commands
+#   each: {name, cwd (folder inside the project), cmd, port?, url?}
+#   env   variable names the project needs (never values)
+#   provides   pieces other projects can reuse     uses   other projects / services it depends on
+
+name: Pitshop-printer
+summary: Standalone offline Windows Scan-to-Print kiosk
+kind: app
+status: active
+tags: [node, express]
+run:
+- {name: start, cmd: pnpm start}
+setup:
+- {name: Install, cmd: pnpm install}
+build:
+- {name: Build, cmd: pnpm build}
+test:
+- {name: test, cmd: pnpm test}
+env: [HOTSPOT_SSID, HOTSPOT_PASSWORD, HOTSPOT_GATEWAY, HOTSPOT_SUBNET_MASK, SERVER_PORT, SESSION_TTL_MINUTES, MAX_UPLOAD_MB,
+  PRINTER_NAME, CONVERSION_METHOD, LIBREOFFICE_PATH, SUMATRA_PATH, PURGE_CHECK_INTERVAL_SECONDS]

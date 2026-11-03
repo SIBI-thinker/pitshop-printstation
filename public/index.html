@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f3f4f7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0f1115" media="(prefers-color-scheme: dark)">
+  <title>Print Station</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main class="phone">
+    <header class="topbar">
+      <div class="brand"><span class="mark"><i></i><i></i><i></i></span><span id="shopName">Print Station</span></div>
+      <button id="cancelOrder" class="link-btn" hidden>Cancel order</button>
+    </header>
+
+    <!-- 1. Who is printing -->
+    <section id="startScreen" hidden>
+      <div class="hero">
+        <h1>Print from your phone</h1>
+        <p class="muted">Upload your files, set how each one prints, and collect them at the counter with a PIN.</p>
+      </div>
+      <ol class="steps">
+        <li>Upload files</li>
+        <li>Set &amp; preview</li>
+        <li>Show your PIN</li>
+      </ol>
+      <div id="openOrders" class="card" style="margin-bottom: 14px" hidden>
+        <div class="card-title"><h2>Continue your order</h2></div>
+        <div id="openOrderList" class="files"></div>
+      </div>
+      <form id="startForm" class="card" novalidate>
+        <div id="fullNotice" class="notice warn" style="margin-bottom: 14px" hidden></div>
+        <div class="field">
+          <label for="name">Your name</label>
+          <input id="name" class="input" autocomplete="name" maxlength="50" required>
+        </div>
+        <div class="field">
+          <label for="mobile">Mobile number</label>
+          <input id="mobile" class="input" type="tel" inputmode="tel" autocomplete="tel" maxlength="18" placeholder="98765 43210" required>
+        </div>
+        <button class="btn block">Continue</button>
+      </form>
+    </section>
+
+    <!-- 2. Files, each with its own print settings -->
+    <section id="orderScreen" hidden>
+      <div class="card">
+        <div class="card-title"><h2>Your files</h2><span id="fileCount" class="muted small"></span></div>
+        <p class="muted small" style="margin: -6px 0 12px">Tap a file to choose how it prints and see a preview.</p>
+        <div id="fileList" class="files"></div>
+        <label id="drop" class="drop" style="margin-top: 10px">
+          <input id="fileInput" type="file" multiple>
+          <span class="plus">+</span>
+          <strong>Add files</strong>
+          <span id="acceptHint" class="muted small"></span>
+        </label>
+      </div>
+      <p id="helpLine" class="help"></p>
+    </section>
+
+    <!-- 3. PIN and status -->
+    <section id="pinScreen" hidden>
+      <div class="card status-hero">
+        <span id="statusPill" class="pill"></span>
+        <h1>Your print PIN</h1>
+        <div id="pinDigits" class="pin"></div>
+        <p id="statusText" class="muted" style="margin-top: 16px"></p>
+        <div class="big-total">
+          <div><b id="pinPages">0</b><span>pages to print</span></div>
+          <div><b id="pinSheets">0</b><span>sheets of paper</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><h2>Order details</h2><span id="pinExpiry" class="muted small"></span></div>
+        <div id="pinFiles" class="files"></div>
+      </div>
+      <div class="actions">
+        <button id="editOrder" class="btn ghost block" hidden>Change files or settings</button>
+        <button id="newOrder" class="btn block" hidden>Start a new order</button>
+      </div>
+    </section>
+  </main>
+
+  <div id="summaryBar" class="summary-bar" hidden>
+    <div class="summary-inner">
+      <div class="totals"><b id="sumPages">0 pages</b><div id="sumDetail" class="muted">Add a file to begin</div></div>
+      <button id="reviewBtn" class="btn" disabled>Confirm</button>
+    </div>
+  </div>
+
+  <!-- Per-file settings with a live print preview -->
+  <div id="editor" class="pv-backdrop" hidden>
+    <div class="pv-panel editor" role="dialog" aria-modal="true" aria-labelledby="edName">
+      <div class="pv-head">
+        <div class="pv-titles"><h2 id="edName"></h2><p id="edSummary" class="muted small"></p></div>
+        <button id="edClose" class="icon-btn" type="button" aria-label="Close">×</button>
+      </div>
+      <div class="ed-preview">
+        <div id="edSheets" class="pv-sheets strip"></div>
+        <span id="edBadge" class="ed-badge" hidden></span>
+      </div>
+      <div class="ed-options">
+        <div class="option" id="colorOption">
+          <div class="option-label">Colour</div>
+          <div class="seg" data-setting="color">
+            <button type="button" data-value="bw">Black &amp; white</button>
+            <button type="button" data-value="color">Colour</button>
+          </div>
+        </div>
+        <div class="option" id="sidesOption">
+          <div class="option-label">Sides</div>
+          <div class="seg" data-setting="duplex">
+            <button type="button" data-value="single">Single-sided</button>
+            <button type="button" data-value="double">Double-sided</button>
+          </div>
+        </div>
+        <div class="option" id="flipOption" hidden>
+          <div class="option-label">Flip pages on</div>
+          <div class="seg" data-setting="sides">
+            <button type="button" data-value="double-long">Long edge (book)</button>
+            <button type="button" data-value="double-short">Short edge (flip up)</button>
+          </div>
+        </div>
+        <div class="option">
+          <div class="option-label">Orientation</div>
+          <div class="seg" data-setting="orientation">
+            <button type="button" data-value="auto">Auto</button>
+            <button type="button" data-value="portrait">Portrait</button>
+            <button type="button" data-value="landscape">Landscape</button>
+          </div>
+        </div>
+        <div class="option">
+          <div class="option-label">Paper size</div>
+          <div class="seg wrap" id="paperSeg" data-setting="paper"></div>
+        </div>
+        <div class="option">
+          <div class="option-label">Scaling</div>
+          <div class="seg" data-setting="scale">
+            <button type="button" data-value="fit">Fit to page</button>
+            <button type="button" data-value="shrink">Shrink only</button>
+            <button type="button" data-value="noscale">Actual size</button>
+          </div>
+        </div>
+        <div class="option" id="pagesOption">
+          <div class="option-label"><span>Pages</span><span id="edPagesInfo" class="muted small"></span></div>
+          <form id="rangeForm" class="range-row">
+            <input id="rangeInput" class="input" inputmode="numeric" autocomplete="off" placeholder="All pages, or e.g. 1-3, 5">
+            <button class="btn small">Apply</button>
+          </form>
+          <div id="rangeError" class="field-error" hidden></div>
+        </div>
+        <div class="option">
+          <div class="option-label"><span>Copies</span></div>
+          <div class="stepper">
+            <button type="button" id="copiesDown" aria-label="Fewer copies">−</button>
+            <output id="copies">1</output>
+            <button type="button" id="copiesUp" aria-label="More copies">+</button>
+          </div>
+        </div>
+      </div>
+      <div class="ed-foot">
+        <button id="edAll" class="btn ghost" type="button">Use for all files</button>
+        <button id="edDone" class="btn" type="button">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="reviewSheet" class="sheet-backdrop" hidden>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="reviewTitle">
+      <h2 id="reviewTitle" style="font-size: 20px">Check your order</h2>
+      <dl id="reviewRows" class="rows"></dl>
+      <div class="actions" style="margin-top: 0">
+        <button id="confirmBtn" class="btn block">Confirm and get PIN</button>
+        <button id="closeReview" class="btn ghost block">Go back</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/preview.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

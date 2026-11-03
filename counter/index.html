@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Print Counter</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="counter">
+    <header class="counter-top">
+      <div class="brand"><span class="mark"><i></i><i></i><i></i></span><span id="shopName">Print Station</span></div>
+      <span id="customersPill" class="pill" title="Customers with an open order or PIN">0/10 customers</span>
+      <span id="waitingPill" class="pill">0 waiting</span>
+      <span id="printerPill" class="pill" title="Printer">Printer</span>
+      <span id="sumatraPill" class="pill bad" title="SumatraPDF sends PDFs to the printer" hidden>SumatraPDF not installed</span>
+      <span id="clock" class="clock"></span>
+    </header>
+
+    <main class="counter-main">
+      <section class="card connect">
+        <h2>Scan to connect</h2>
+        <p class="muted small" style="margin-bottom: 14px">Join the Wi-Fi and the print page opens on the phone</p>
+        <img id="wifiQr" alt="Wi-Fi QR code">
+        <dl class="rows">
+          <div><dt>Wi-Fi</dt><strong id="ssid"></strong></div>
+          <div><dt>Password</dt><strong id="password" class="mono"></strong></div>
+          <div><dt>If it doesn't open</dt><strong id="siteUrl" class="mono"></strong></div>
+        </dl>
+      </section>
+
+      <section>
+        <!-- PIN entry -->
+        <div id="pinView" class="card">
+          <div class="pin-entry">
+            <h2>Enter the customer's PIN</h2>
+            <p class="muted">Type the 4-digit PIN shown on their phone</p>
+            <div id="pinBoxes" class="pin"><span></span><span></span><span></span><span></span></div>
+            <div id="pinError" class="pin-error" role="alert"></div>
+            <div class="keypad" id="keypad">
+              <button data-key="1">1</button><button data-key="2">2</button><button data-key="3">3</button>
+              <button data-key="4">4</button><button data-key="5">5</button><button data-key="6">6</button>
+              <button data-key="7">7</button><button data-key="8">8</button><button data-key="9">9</button>
+              <button data-key="clear" class="fn">Clear</button><button data-key="0">0</button><button data-key="back" class="fn" aria-label="Delete">⌫</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order -->
+        <div id="orderView" class="card" hidden>
+          <div class="order-head">
+            <span id="orderPin" class="pin-chip"></span>
+            <div class="who">
+              <h2 id="orderName"></h2>
+              <p class="muted"><span id="orderMobile" class="mono"></span> · <span id="orderTime"></span></p>
+            </div>
+            <span id="orderStatus" class="pill"></span>
+          </div>
+          <div class="order-grid">
+            <div>
+              <div class="card-title"><h2>Files</h2><span id="orderFileCount" class="muted small"></span></div>
+              <div id="orderFiles" class="files"></div>
+            </div>
+            <div>
+              <div class="totals-box">
+                <span>Pages to print</span>
+                <b id="orderPages">0</b>
+                <div class="split">
+                  <div><b id="orderSheets">0</b><span>sheets</span></div>
+                  <div><b id="orderFileTotal">1</b><span>files</span></div>
+                </div>
+              </div>
+              <div id="orderNotice" class="notice" hidden style="margin-bottom: 12px"></div>
+              <div class="actions" style="margin-top: 0">
+                <button id="printBtn" class="btn ok big-btn">Print now</button>
+                <button id="rejectBtn" class="btn danger">Reject order</button>
+                <button id="backBtn" class="btn ghost">Back to PIN entry <span class="muted small">(Esc)</span></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="counter-foot">
+      <div class="card-title" style="margin-bottom: 8px"><h2 style="font-size: 14px" class="muted">Recent orders</h2><span id="queueText" class="muted small"></span></div>
+      <div id="recent" class="recent"><span class="muted small">No orders yet today</span></div>
+    </footer>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/preview.js"></script>
+  <script src="/counter/counter.js"></script>
+</body>
+</html>
